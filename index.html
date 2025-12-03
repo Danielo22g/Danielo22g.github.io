@@ -1,0 +1,1971 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FiveM Server | La Experiencia Definitiva</title>
+    <style>
+        :root {
+            --primary-color: #ffffff;
+            --secondary-color: #aaaaaa;
+            --dark-color: #000000;
+            --background-color: #050505;
+            --card-background: linear-gradient(145deg, #0a0a0a, #1a1a1a);
+            --accent-color: #00ffff;
+            --success-color: #00ff00;
+            --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --font-mono: 'Courier New', Courier, monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--dark-color);
+            font-family: var(--font-main);
+            color: var(--primary-color);
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, rgba(0, 255, 255, 0.05) 30%, rgba(0, 0, 0, 0) 70%);
+            z-index: 0;
+            animation: rotate-nebula 120s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes rotate-nebula {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* --- Estilos del Preloader --- */
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+
+        #preloader.loaded {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loader-logo {
+            width: 150px;
+            height: 150px;
+            animation: pulse-loader 1.5s ease-in-out infinite;
+            filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.5));
+        }
+
+        @keyframes pulse-loader {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+        }
+
+        /* --- Scrollbar Personalizado --- */
+        ::-webkit-scrollbar {
+            width: 10px;
+            background-color: #080808;
+        }
+
+        ::-webkit-scrollbar-track {
+            background-color: #080808;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            border: 2px solid #080808;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* --- Sistema de Partículas Canvas --- */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        /* --- Líneas de fondo animadas --- */
+        .lines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .line {
+            position: absolute;
+            width: 1px;
+            height: 100%;
+            background: linear-gradient(transparent, rgba(255, 255, 255, 0.05), transparent);
+            animation: line-move 10s linear infinite;
+        }
+        
+        .line:nth-child(1) { left: 10%; animation-delay: 0s; animation-duration: 12s; }
+        .line:nth-child(2) { left: 20%; animation-delay: -3s; animation-duration: 8s; }
+        .line:nth-child(3) { left: 30%; animation-delay: -5s; animation-duration: 15s; }
+        .line:nth-child(4) { left: 40%; animation-delay: -1s; animation-duration: 7s; }
+        .line:nth-child(5) { left: 50%; animation-delay: -8s; animation-duration: 10s; }
+        .line:nth-child(6) { left: 60%; animation-delay: -10s; animation-duration: 13s; }
+        .line:nth-child(7) { left: 70%; animation-delay: -4s; animation-duration: 9s; }
+        .line:nth-child(8) { left: 80%; animation-delay: -2s; animation-duration: 11s; }
+        .line:nth-child(9) { left: 90%; animation-delay: -7s; animation-duration: 14s; }
+
+        @keyframes line-move {
+            0% {
+                transform: translateY(-100%);
+            }
+            100% {
+                transform: translateY(100%);
+            }
+        }
+
+        /* --- Cabecera --- */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 50px;
+            background: rgba(0, 0, 0, 0.85);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: top 0.3s ease;
+        }
+
+        .header-left {
+            font-size: 14px;
+            color: var(--secondary-color);
+            letter-spacing: 2px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .header-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        header img {
+            height: 60px;
+            filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.3));
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.3s ease;
+        }
+
+        header img:hover {
+            transform: scale(1.15) rotate(5deg);
+            filter: drop-shadow(0 0 35px rgba(255, 255, 255, 0.6));
+        }
+
+        .header-right {
+            font-size: 14px;
+            color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .status-online {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: var(--success-color);
+            border-radius: 50%;
+            margin-right: 10px;
+            box-shadow: 0 0 15px var(--success-color), 0 0 25px var(--success-color);
+            animation: pulse-live 1.5s infinite;
+        }
+        
+        .status-dot {
+            animation: pulse-live 1.5s infinite;
+        }
+
+        @keyframes pulse-live {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.2); }
+        }
+
+        /* --- Sección Hero --- */
+        .hero {
+            margin-top: 100px;
+            padding: 120px 20px 100px;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(5, 5, 5, 0.9) 80%, var(--background-color) 100%);
+            overflow: hidden;
+        }
+
+        .hero h1 {
+            font-size: 84px;
+            font-weight: 900;
+            margin-bottom: 25px;
+            background: linear-gradient(45deg, #fff, #bbb, #fff);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 60px rgba(255, 255, 255, 0.4);
+            animation: glow-text 5s ease-in-out infinite, gradient-move 5s ease-in-out infinite;
+            letter-spacing: -2px;
+        }
+        
+        @keyframes gradient-move {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes glow-text {
+            0%, 100% { filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.3)); }
+            50% { filter: drop-shadow(0 0 50px rgba(255, 255, 255, 0.6)); }
+        }
+
+        .hero p {
+            font-size: 26px;
+            color: var(--secondary-color);
+            margin-bottom: 50px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 300;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 25px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .hero-btn {
+            padding: 20px 50px;
+            font-size: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--primary-color);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-decoration: none;
+            display: inline-block;
+            backdrop-filter: blur(10px);
+            font-weight: bold;
+            letter-spacing: 1.5px;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+        }
+        
+        .hero-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.4s ease, height 0.4s ease;
+            z-index: 0;
+        }
+        
+        .hero-btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.8);
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(255, 255, 255, 0.2);
+        }
+        
+        .hero-btn:hover::before {
+            width: 250%;
+            height: 500%;
+        }
+
+        .hero-btn.primary {
+            background: var(--primary-color);
+            color: var(--dark-color);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.4);
+        }
+
+        .hero-btn.primary:hover {
+            background: var(--primary-color);
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 15px 50px rgba(255, 255, 255, 0.6);
+        }
+        
+        .hero-btn.primary::before {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        /* --- Sección de Estadísticas --- */
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            padding: 80px 40px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 2;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-item {
+            text-align: center;
+            min-width: 200px;
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-item:hover {
+            transform: scale(1.1);
+        }
+
+        .stat-number {
+            font-size: 56px;
+            font-weight: 900;
+            background: linear-gradient(45deg, #fff, #aaa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-label {
+            font-size: 16px;
+            color: var(--secondary-color);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+        
+        /* --- Estilos Generales de Sección --- */
+        
+        .section {
+            position: relative;
+            z-index: 2;
+        }
+
+        .container {
+            padding: 40px 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .container-large {
+            max-width: 1600px;
+        }
+        
+        .container-medium {
+            max-width: 1200px;
+        }
+        
+        .container-small {
+            max-width: 900px;
+            grid-template-columns: 1fr;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 56px;
+            font-weight: 900;
+            margin: 100px 0 60px;
+            background: linear-gradient(45deg, #fff, #999);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            z-index: 2;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 40px rgba(255, 255, 255, 0.2);
+        }
+        
+        .section-title::before {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: var(--accent-color);
+            border-radius: 2px;
+            box-shadow: 0 0 20px var(--accent-color);
+        }
+
+        /* --- Animación de Revelado al Scroll --- */
+        .reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .reveal.reveal-left {
+            transform: translateX(-50px);
+        }
+        
+        .reveal.reveal-right {
+            transform: translateX(50px);
+        }
+
+        .reveal.reveal-left.visible,
+        .reveal.reveal-right.visible {
+            transform: translateX(0);
+        }
+
+        /* --- Tarjetas 3D (Sección Conectar y Por Qué) --- */
+        .card {
+            background: var(--card-background);
+            border-radius: 20px;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.1), transparent 50%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -150%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(110deg, transparent 40%, rgba(255, 255, 255, 0.05) 50%, transparent 60%);
+            transform: rotate(25deg);
+            transition: left 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .card:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card:hover::after {
+            left: 100%;
+        }
+
+        .card-logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 30px;
+            display: block;
+            filter: drop-shadow(0 5px 15px rgba(255, 255, 255, 0.1));
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
+        }
+
+        .card-title {
+            font-size: 26px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transform-style: preserve-3d;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            z-index: 2;
+        }
+
+        .card-content {
+            text-align: center;
+            font-size: 18px;
+            line-height: 1.7;
+            color: var(--secondary-color);
+            transform-style: preserve-3d;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            z-index: 2;
+        }
+
+        .connect-text {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-family: var(--font-mono);
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            margin-top: 25px;
+            display: inline-block;
+            color: var(--primary-color);
+            word-break: break-all;
+        }
+
+        .connect-text:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent-color);
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .connect-text:active {
+            transform: scale(0.98);
+        }
+
+        /* --- Sección de Galería --- */
+        .gallery-section {
+            padding: 60px 0;
+            background: rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .slider-wrapper {
+            position: relative;
+            max-width: 1400px;
+            margin: 0 auto;
+            overflow: hidden;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .slider {
+            display: flex;
+            transition: transform 0.6s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+        
+        .slide {
+            flex: 0 0 100%;
+            width: 100%;
+            position: relative;
+            aspect-ratio: 16 / 7;
+        }
+        
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .slide-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 30px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 0 2px 10px #000;
+        }
+        
+        .slider-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        .slider-btn {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 15px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 24px;
+            line-height: 1;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: all;
+            backdrop-filter: blur(5px);
+        }
+
+        .slider-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: white;
+            transform: scale(1.1);
+        }
+
+        .slider-dots {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+        
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .dot.active {
+            background: white;
+            transform: scale(1.2);
+            box-shadow: 0 0 10px white;
+        }
+
+        /* --- Sección de Staff --- */
+        .staff-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .staff-card {
+            background: var(--card-background);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+            perspective: 800px;
+        }
+        
+        .staff-card:hover {
+            transform: translateY(-15px) scale(1.05);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .staff-image-wrapper {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin: 0 auto 25px;
+            overflow: hidden;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .staff-card:hover .staff-image-wrapper {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.5);
+            transform: scale(1.05);
+        }
+        
+        .staff-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        
+        .staff-card:hover .staff-image {
+            transform: scale(1.1);
+        }
+
+        .staff-info h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: var(--primary-color);
+            letter-spacing: 1px;
+        }
+        
+        .staff-info .staff-role {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px var(--accent-color);
+        }
+        
+        .staff-info p {
+            font-size: 15px;
+            color: var(--secondary-color);
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+        
+        .staff-socials {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .staff-socials a {
+            color: var(--secondary-color);
+            font-size: 24px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .staff-socials a:hover {
+            color: var(--accent-color);
+            transform: scale(1.2) rotate(10deg);
+        }
+        
+        /* Efecto Glitch para Staff */
+        .staff-card .glitch-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .staff-card:hover .glitch-overlay {
+            opacity: 1;
+        }
+
+        .glitch-overlay::before,
+        .glitch-overlay::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: inherit;
+            background-size: cover;
+            background-position: center;
+            opacity: 0.8;
+        }
+        
+        .staff-card:hover .glitch-overlay::before {
+            animation: glitch-1 0.5s infinite;
+        }
+        
+        .staff-card:hover .glitch-overlay::after {
+            animation: glitch-2 0.5s infinite;
+        }
+
+        @keyframes glitch-1 {
+            0% { transform: translate(0); }
+            20% { transform: translate(-5px, 3px); }
+            40% { transform: translate(3px, -2px); }
+            60% { transform: translate(-4px, 1px); }
+            80% { transform: translate(2px, -3px); }
+            100% { transform: translate(0); }
+        }
+
+        @keyframes glitch-2 {
+            0% { transform: translate(0); clip-path: inset(0 0 0 0); }
+            10% { clip-path: inset(10% 0 80% 0); }
+            20% { transform: translate(5px, -3px); clip-path: inset(30% 0 60% 0); }
+            30% { clip-path: inset(50% 0 40% 0); }
+            40% { transform: translate(-3px, 2px); clip-path: inset(70% 0 20% 0); }
+            50% { clip-path: inset(90% 0 5% 0); }
+            60% { transform: translate(4px, -1px); clip-path: inset(10% 0 85% 0); }
+            70% { clip-path: inset(40% 0 55% 0); }
+            80% { transform: translate(-2px, 3px); clip-path: inset(65% 0 30% 0); }
+            90% { clip-path: inset(85% 0 10% 0); }
+            100% { transform: translate(0); clip-path: inset(0 0 0 0); }
+        }
+
+        /* --- Sección de Reglas (Acordeón) --- */
+        .rules-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .accordion-item {
+            background: var(--card-background);
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            transition: border-color 0.3s ease;
+        }
+        
+        .accordion-item:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+        
+        .accordion-header {
+            padding: 25px 30px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--primary-color);
+            transition: background-color 0.3s ease;
+        }
+        
+        .accordion-header:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+        
+        .accordion-icon {
+            font-size: 24px;
+            font-weight: bold;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            color: var(--accent-color);
+        }
+        
+        .accordion-header.active .accordion-icon {
+            transform: rotate(45deg);
+        }
+        
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), padding 0.5s ease;
+            color: var(--secondary-color);
+        }
+        
+        .accordion-content p {
+            padding: 0 30px 30px;
+            font-size: 17px;
+            line-height: 1.8;
+        }
+        
+        .accordion-content ul {
+            padding: 0 30px 30px 50px;
+            font-size: 17px;
+            line-height: 1.8;
+        }
+        
+        .accordion-content li {
+            margin-bottom: 10px;
+        }
+        
+        .accordion-content.active {
+            max-height: 1000px; /* Suficientemente grande */
+        }
+
+        /* --- Mega Footer --- */
+        .mega-footer {
+            margin-top: 100px;
+            padding: 80px 50px 40px;
+            background: #020202;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .footer-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            max-width: 1400px;
+            margin: 0 auto 50px;
+        }
+        
+        .footer-column {
+            padding: 0 15px;
+        }
+        
+        .footer-column .footer-logo {
+            width: 120px;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.1));
+        }
+        
+        .footer-column h4 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            position: relative;
+        }
+        
+        .footer-column h4::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -8px;
+            width: 40px;
+            height: 3px;
+            background: var(--accent-color);
+            border-radius: 2px;
+        }
+        
+        .footer-column p {
+            color: var(--secondary-color);
+            font-size: 15px;
+            line-height: 1.7;
+        }
+        
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 15px;
+        }
+        
+        .footer-links a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .footer-links a::before {
+            content: '»';
+            position: absolute;
+            left: -20px;
+            opacity: 0;
+            transition: all 0.3s ease;
+            color: var(--accent-color);
+        }
+        
+        .footer-links a:hover {
+            color: var(--primary-color);
+            padding-left: 10px;
+        }
+        
+        .footer-links a:hover::before {
+            left: -10px;
+            opacity: 1;
+        }
+        
+        .footer-socials {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .social-icon {
+            width: 45px;
+            height: 45px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--primary-color);
+            font-size: 20px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .social-icon:hover {
+            background: var(--accent-color);
+            color: var(--dark-color);
+            transform: translateY(-5px) scale(1.1);
+            box-shadow: 0 0 20px var(--accent-color);
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            padding-top: 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .footer-bottom p {
+            color: #666;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+        
+        .footer-bottom p a {
+            color: #888;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .footer-bottom p a:hover {
+            color: var(--accent-color);
+        }
+
+        /* --- Mensaje de Copiado --- */
+        .copied-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: linear-gradient(135deg, #f0f0f0, #ffffff);
+            color: #000;
+            padding: 25px 50px;
+            border-radius: 15px;
+            font-size: 20px;
+            font-weight: bold;
+            box-shadow: 0 20px 60px rgba(255, 255, 255, 0.5);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease;
+            z-index: 2000;
+            pointer-events: none;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .copied-message.show {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* --- Estilos Responsivos --- */
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 30px;
+            }
+            
+            .section-title {
+                font-size: 42px;
+            }
+            
+            .hero h1 {
+                font-size: 64px;
+            }
+            
+            .hero p {
+                font-size: 20px;
+            }
+            
+            .staff-grid {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            }
+            
+            .slide {
+                aspect-ratio: 16 / 9;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 48px;
+            }
+
+            .hero p {
+                font-size: 18px;
+            }
+
+            header {
+                padding: 20px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .header-left, .header-right {
+                display: none;
+            }
+            
+            .header-center {
+                flex: 1 1 100%;
+                justify-content: center;
+                margin-bottom: 10px; /* Ajuste por si acaso */
+            }
+
+            .container {
+                grid-template-columns: 1fr;
+                padding: 20px;
+            }
+            
+            .staff-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 30px 20px;
+            }
+
+            .card-title {
+                font-size: 22px;
+            }
+
+            .connect-text {
+                font-size: 14px;
+                padding: 12px 20px;
+            }
+
+            .stats {
+                gap: 30px;
+                padding: 60px 20px;
+            }
+
+            .stat-number {
+                font-size: 42px;
+            }
+            
+            .stat-item {
+                min-width: 150px;
+            }
+            
+            .hero-buttons {
+                gap: 15px;
+            }
+            
+            .hero-btn {
+                padding: 18px 40px;
+                font-size: 16px;
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .section-title {
+                font-size: 36px;
+                margin: 80px 0 40px;
+            }
+            
+            .footer-container {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            
+            .footer-column h4::after {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            
+            .footer-links a:hover {
+                padding-left: 0;
+            }
+            
+            .footer-links a::before {
+                display: none;
+            }
+            
+            .footer-socials {
+                justify-content: center;
+            }
+            
+            .slider-nav {
+                display: none; /* Ocultar flechas en móvil, usar dots */
+            }
+            
+            .slide-caption {
+                font-size: 18px;
+                padding: 20px;
+            }
+            
+            .accordion-header {
+                font-size: 18px;
+                padding: 20px;
+            }
+            
+            .accordion-content p,
+            .accordion-content ul {
+                font-size: 16px;
+                padding: 0 20px 20px;
+            }
+            
+            .accordion-content ul {
+                padding-left: 40px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 38px;
+            }
+            
+            .hero p {
+                font-size: 16px;
+                letter-spacing: 1px;
+            }
+            
+            .stat-number {
+                font-size: 36px;
+            }
+            
+            .stat-label {
+                font-size: 14px;
+            }
+            
+            .section-title {
+                font-size: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="preloader">
+        <img src="logo1s.png" alt="Cargando..." class="loader-logo">
+    </div>
+
+    <canvas id="particle-canvas"></canvas>
+
+    <div class="lines">
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+    </div>
+
+    <header>
+        <div class="header-left">
+            🌐 FIVEM SERVER
+        </div>
+        <div class="header-center">
+            <img src="logo1s.png" alt="Server Logo">
+        </div>
+        <div class="header-right">
+            <span class="status-online"></span>
+            <span id="player-count">500+</span> JUGADORES
+        </div>
+    </header>
+
+    <div class="hero">
+        <h1>BIENVENIDO</h1>
+        <p>La mejor experiencia de roleplay te espera</p>
+        <div class="hero-buttons">
+            <button class="hero-btn primary" onclick="copyToClipboard('connect cfx.re/join/6gyo7j')"><span>Conectar Ahora</span></button>
+            <button class="hero-btn" onclick="copyToClipboard('https://discord.gg/XcS58GqNTe')"><span>Únete al Discord</span></button>
+        </div>
+    </div>
+
+    <div class="stats reveal">
+        <div class="stat-item">
+            <div class="stat-number">500+</div>
+            <div class="stat-label">Jugadores Activos</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">24/7</div>
+            <div class="stat-label">Servidor Online</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">100+</div>
+            <div class="stat-label">Scripts Únicos</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">0</div>
+            <div class="stat-label">Antiroles</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title reveal">CONÉCTATE</h2>
+        <div class="container">
+            <div class="card reveal reveal-left">
+                <img src="logo1s.png" alt="Logo" class="card-logo">
+                <div class="card-title">Servidor FiveM</div>
+                <div class="card-content">
+                    Haz click para copiar y conectarte directamente a nuestro servidor
+                    <div class="connect-text" onclick="copyToClipboard('connect cfx.re/join/6gyo7j')">
+                        connect cfx.re/join/6gyo7j
+                    </div>
+                </div>
+            </div>
+
+            <div class="card reveal reveal-right">
+                <img src="logo1s.png" alt="Logo" class="card-logo">
+                <div class="card-title">Discord Oficial</div>
+                <div class="card-content">
+                    Únete a nuestra comunidad y mantente actualizado con todas las novedades
+                    <div class="connect-text" onclick="copyToClipboard('https://discord.gg/XcS58GqNTe')">
+                        https://discord.gg/XcS58GqNTe
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="gallery-section reveal">
+        <h2 class="section-title reveal">Galería del Servidor</h2>
+        <div class="slider-wrapper reveal">
+            <div class="slider">
+                <div class="slide">
+                    <img src="https://via.placeholder.com/1600x700/ff0000/ffffff?text=Imagen+de+Policía+Épica" alt="Evento Policial">
+                    <div class="slide-caption">Persecuciones a alta velocidad</div>
+                </div>
+                <div class="slide">
+                    <img src="https://via.placeholder.com/1600x700/00ff00/000000?text=Coches+Personalizados" alt="Taller de coches">
+                    <div class="slide-caption">Cientos de vehículos importados</div>
+                </div>
+                <div class="slide">
+                    <img src="https://via.placeholder.com/1600x700/0000ff/ffffff?text=Evento+de+Mafia" alt="Reunión de mafia">
+                    <div class="slide-caption">Roleplay de bandas y mafias</div>
+                </div>
+                <div class="slide">
+                    <img src="https://via.placeholder.com/1600x700/ffff00/000000?text=Vistas+de+la+Ciudad" alt="Vistas de Los Santos">
+                    <div class="slide-caption">Mapas y MLOs exclusivos</div>
+                </div>
+            </div>
+            <div class="slider-nav">
+                <button class="slider-btn" id="prevSlide">❮</button>
+                <button class="slider-btn" id="nextSlide">❯</button>
+            </div>
+            <div class="slider-dots" id="slider-dots">
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title reveal">¿POR QUÉ ELEGIRNOS?</h2>
+        <div class="container">
+            <div class="card reveal">
+                <img src="logo1s.png" alt="Logo" class="card-logo">
+                <div class="card-title">🎨 Diseño Increíble</div>
+                <div class="card-content">
+                    Servidor con una estética única, mapas personalizados y texturas de alta calidad que te sumergirán en una experiencia visual incomparable. Cada rincón está diseñado con detalle.
+                </div>
+            </div>
+
+            <div class="card reveal">
+                <img src="logo1s.png" alt="Logo" class="card-logo">
+                <div class="card-title">🚫 Sin Antiroles</div>
+                <div class="card-content">
+                    Disfruta de una experiencia de juego limpia y justa. Nuestro servidor está completamente libre de antiroles. Roleplay puro y auténtico en cada momento.
+                </div>
+            </div>
+
+            <div class="card reveal">
+                <img src="logo1s.png" alt="Logo" class="card-logo">
+                <div class="card-title">👥 Comunidad Activa</div>
+                <div class="card-content">
+                    Únete a una comunidad vibrante y activa con cientos de jugadores online. Staff profesional y atento 24/7. Siempre encontrarás gente para roleplay de calidad.
+                </div>
+            </div>
+
+            <div class="card reveal">
+                <img src="logo1s.png" alt="Logo" class="card-logo">
+                <div class="card-title">⚡ Optimización Superior</div>
+                <div class="card-content">
+                    Servidor optimizado al máximo con los mejores recursos. Garantizamos 60+ FPS estables, cero lag y sin interrupciones. Rendimiento perfecto incluso en PCs modestos.
+                </div>
+            </div>
+
+            <div class="card reveal">
+                <img src="logo1s.png" alt="Logo" class="card-logo">
+                <div class="card-title">🎭 Roleplay Realista</div>
+                <div class="card-content">
+                    Sistemas de trabajos, economía balanceada, empresas, mafias y mucho más. Vive una segunda vida con infinitas posibilidades. Tu historia comienza aquí.
+                </div>
+            </div>
+
+            <div class="card reveal">
+                <img src="logo1s.png" alt="Logo" class="card-logo">
+                <div class="card-title">🔧 Scripts Exclusivos</div>
+                <div class="card-content">
+                    Más de 100 scripts personalizados y exclusivos. Sistemas únicos que no encontrarás en ningún otro servidor. Actualizaciones constantes con nuevo contenido.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2 class="section-title reveal">CONOCE AL EQUIPO</h2>
+        <div class="staff-grid reveal">
+            <div class="staff-card reveal">
+                <div class="glitch-overlay" style="background-image: url('Captura de pantalla 2025-10-25 134442.png');"></div>
+                <div class="staff-image-wrapper">
+                    <img src="pfl.png" alt="p.flzz" class="staff-image">
+                </div>
+                <div class="staff-info">
+                    <h3>p.flzz</h3>
+                    <div class="staff-role">Fundador</div>
+                    <p>El cerebro detrás de la operación. Liderando la comunidad hacia el futuro.</p>
+                    <div class="staff-socials">
+                        <a href="#" aria-label="Twitter">T</a>
+                        <a href="#" aria-label="Discord">D</a>
+                        <a href="#" aria-label="Twitch">T</a>
+                    </div>
+                </div>
+            </div>
+            <div class="staff-card reveal">
+                <div class="glitch-overlay" style="background-image: url('Captura de pantalla 2025-10-25 134451.png');"></div>
+                <div class="staff-image-wrapper">
+                    <img src="ntla.png" alt="natalia093881" class="staff-image">
+                </div>
+                <div class="staff-info">
+                    <h3>natalia093881</h3>
+                    <div class="staff-role">Co-Fundador</div>
+                    <p>El desarrollador principal. Mago del código y creador de scripts únicos.</p>
+                    <div class="staff-socials">
+                        <a href="#" aria-label="Twitter">T</a>
+                        <a href="#" aria-label="Discord">D</a>
+                        <a href="#" aria-label="Github">G</a>
+                    </div>
+                </div>
+            </div>
+            <div class="staff-card reveal">
+                <div class="glitch-overlay" style="background-image: url('Captura de pantalla 2025-10-25 134334.png');"></div>
+                <div class="staff-image-wrapper">
+                    <img src="extra.png" alt="! extra.5" class="staff-image">
+                </div>
+                <div class="staff-info">
+                    <h3>! extra.5</h3>
+                    <div class="staff-role">Director Staff</div>
+                    <p>Encargado de la comunidad y los eventos. Mantiene todo en orden.</p>
+                    <div class="staff-socials">
+                        <a href="#" aria-label="Twitter">T</a>
+                        <a href="#" aria-label="Discord">D</a>
+                        <a href="#" aria-label="Instagram">I</a>
+                    </div>
+                </div>
+            </div>
+            <div class="staff-card reveal">
+                <div class="glitch-overlay" style="background-image: url('Captura de pantalla 2025-10-25 134459.png');"></div>
+                <div class="staff-image-wrapper">
+                    <img src="ferr.png" alt="feerraann_07" class="staff-image">
+                </div>
+                <div class="staff-info">
+                    <h3>feerraann_07</h3>
+                    <div class="staff-role">SubDirector Staff</div>
+                    <p>El ojo vigilante. Se asegura de que las reglas se cumplan y el roleplay sea puro.</p>
+                    <div class="staff-socials">
+                        <a href="#" aria-label="Twitter">T</a>
+                        <a href="#" aria-label="Discord">D</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2 class="section-title reveal">REGLAMENTO DEL SERVIDOR</h2>
+        <div class="rules-container reveal">
+            <div class="accordion-item reveal">
+                <div class="accordion-header">
+                    <span>Reglas Generales de la Comunidad</span>
+                    <span class="accordion-icon">+</span>
+                </div>
+                <div class="accordion-content">
+                    <p>Estas reglas se aplican a todos los miembros, tanto dentro del juego como en Discord.</p>
+                    <ul>
+                        <li>Respeto mutuo ante todo. No se tolerará el racismo, sexismo, homofobia ni ningún tipo de discurso de odio.</li>
+                        <li>Prohibido el spam, flooding o publicidad no autorizada.</li>
+                        <li>El nombre de tu personaje debe ser realista y no ofensivo.</li>
+                        <li>Sigue las directrices de Discord y FiveM.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="accordion-item reveal">
+                <div class="accordion-header">
+                    <span>Conceptos Básicos de Roleplay (RP)</span>
+                    <span class="accordion-icon">+</span>
+                </div>
+                <div class="accordion-content">
+                    <p>El incumplimiento de estas normas básicas resultará en sanciones severas.</p>
+                    <ul>
+                        <li><strong>Valorar tu vida (VDM):</strong> Siempre debes actuar como si tu vida estuviera en peligro real. No te arriesgues innecesariamente.</li>
+                        <li><strong>No-Roleplay (NRP):</strong> Acciones que no tienen sentido en un entorno de roleplay.</li>
+                        <li><strong>Metagaming (MG):</strong> Usar información obtenida fuera del juego (OOC) para beneficio dentro del juego (IC).</li>
+                        <li><strong>Powergaming (PG):</strong> Forzar acciones de roleplay sobre otro jugador sin darle la oportunidad de responder.</li>
+                        <li><strong>Vehicle Deathmatch (VDM):</strong> Usar tu vehículo como arma para atropellar jugadores intencionadamente sin un motivo de rol válido.</li>
+                        <li><strong>Character Kill (CK) y Player Kill (PK):</strong> Entender la diferencia y cuándo aplican.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="accordion-item reveal">
+                <div class="accordion-header">
+                    <span>Reglas de Zonas Seguras y Roles</span>
+                    <span class="accordion-icon">+</span>
+                </div>
+                <div class="accordion-content">
+                    <p>Ciertas áreas y roles tienen normativas especiales.</p>
+                    <ul>
+                        <li><strong>Zonas Seguras:</strong> Hospitales, comisarías (zona de entrada), garajes principales y cajeros son zonas seguras. No se permiten actos delictivos.</li>
+                        <li><strong>Roles de Servicios Públicos (Policía, EMS):</strong> Prohibido el roleplay corrupto extremo sin aprobación administrativa. Deben mantener la seriedad.</li>
+                        <li><strong>Actos Delictivos:</strong> No se permite robar a jugadores nuevos (menos de 5 horas). Los atracos a bancos y tiendas deben tener un roleplay elaborado.</li>
+                    </ul>
+                </div>
+            </div>
+             <div class="accordion-item reveal">
+                <div class="accordion-header">
+                    <span>Normativa de Vehículos y Conducción</span>
+                    <span class="accordion-icon">+</span>
+                </div>
+                <div class="accordion-content">
+                    <p>La conducción debe ser realista.</p>
+                    <ul>
+                        <li>Respeta las señales de tráfico básicas (semáforos, stops) a menos que estés en una persecución o emergencia.</li>
+                        <li>Prohibido el "Off-Road" con vehículos no preparados para ello (superdeportivos por la montaña).</li>
+                        <li>Si tienes un accidente grave, debes rolear las heridas y llamar a EMS.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <footer class="mega-footer">
+        <div class="footer-container">
+            <div class="footer-column">
+                <img src="logo1s.png" alt="Logo Footer" class="footer-logo">
+                <p>© 2025 Todos los derechos reservados. Creado para la mejor comunidad de roleplay.</p>
+                <p>No estamos afiliados a Rockstar Games o Take-Two Interactive.</p>
+            </div>
+            <div class="footer-column">
+                <h4>Enlaces Rápidos</h4>
+                <ul class="footer-links">
+                    <li><a href="#">Inicio</a></li>
+                    <li><a href="#rules">Reglamento</a></li>
+                    <li><a href="#staff">Equipo</a></li>
+                    <li><a href="#gallery">Galería</a></li>
+                    <li><a href="#">Tienda (Próximamente)</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>Comunidad</h4>
+                <p>Únete a nuestras redes para estar al día de todo.</p>
+                <div class="footer-socials">
+                    <a href="#" class="social-icon" aria-label="Discord">D</a>
+                    <a href="#" class="social-icon" aria-label="Twitter">T</a>
+                    <a href="#" class="social-icon" aria-label="Instagram">I</a>
+                    <a href="#" class="social-icon" aria-label="YouTube">Y</a>
+                </div>
+            </div>
+            <div class="footer-column">
+                <h4>Conexión Directa</h4>
+                <p>Copia y pega en tu consola F8 de FiveM:</p>
+                <div class="connect-text" onclick="copyToClipboard('connect cfx.re/join/6gyo7j')">
+                    connect cfx.re/join/6gyo7j
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>Hecho con ❤️ y miles de líneas de código por <a href="#">TuNombreDeCoder</a></p>
+        </div>
+    </footer>
+
+    <div class="copied-message" id="copiedMessage">¡Copiado al portapapeles!</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            /* --- Lógica del Preloader --- */
+            const preloader = document.getElementById('preloader');
+            window.addEventListener('load', () => {
+                setTimeout(() => {
+                    if (preloader) {
+                        preloader.classList.add('loaded');
+                    }
+                }, 500); 
+            });
+
+            /* --- Sistema Avanzado de Partículas en Canvas --- */
+            const canvas = document.getElementById('particle-canvas');
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
+                let particlesArray;
+
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+
+                let mouse = {
+                    x: null,
+                    y: null,
+                    radius: (canvas.height / 100) * (canvas.width / 100)
+                };
+
+                window.addEventListener('mousemove', (event) => {
+                    mouse.x = event.x;
+                    mouse.y = event.y;
+                });
+
+                window.addEventListener('resize', () => {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                    mouse.radius = (canvas.height / 100) * (canvas.width / 100);
+                    initParticles();
+                });
+                
+                window.addEventListener('mouseout', () => {
+                    mouse.x = undefined;
+                    mouse.y = undefined;
+                });
+
+                class Particle {
+                    constructor(x, y, directionX, directionY, size, color) {
+                        this.x = x;
+                        this.y = y;
+                        this.directionX = directionX;
+                        this.directionY = directionY;
+                        this.size = size;
+                        this.color = color;
+                        this.baseX = this.x;
+                        this.baseY = this.y;
+                        this.density = (Math.random() * 30) + 1;
+                    }
+
+                    draw() {
+                        ctx.beginPath();
+                        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+                        ctx.fillStyle = this.color;
+                        ctx.fill();
+                    }
+
+                    update() {
+                        let dx = mouse.x - this.x;
+                        let dy = mouse.y - this.y;
+                        let distance = Math.sqrt(dx * dx + dy * dy);
+                        let forceDirectionX = dx / distance;
+                        let forceDirectionY = dy / distance;
+                        let maxDistance = mouse.radius;
+                        let force = (maxDistance - distance) / maxDistance;
+                        let directionX = forceDirectionX * force * this.density;
+                        let directionY = forceDirectionY * force * this.density;
+
+                        if (distance < mouse.radius) {
+                            this.x -= directionX;
+                            this.y -= directionY;
+                        } else {
+                            if (this.x !== this.baseX) {
+                                let dx = this.x - this.baseX;
+                                this.x -= dx / 10;
+                            }
+                            if (this.y !== this.baseY) {
+                                let dy = this.y - this.baseY;
+                                this.y -= dy / 10;
+                            }
+                        }
+                        
+                        /* Movimiento de 'flote' original */
+                        if (this.x > canvas.width || this.x < 0) {
+                            this.directionX = -this.directionX;
+                        }
+                        if (this.y > canvas.height || this.y < 0) {
+                            this.directionY = -this.directionY;
+                        }
+                        
+                        this.x += this.directionX * 0.1;
+                        this.y += this.directionY * 0.1;
+                        
+                        this.draw();
+                    }
+                }
+
+                function initParticles() {
+                    particlesArray = [];
+                    let numberOfParticles = (canvas.height * canvas.width) / 9000;
+                    for (let i = 0; i < numberOfParticles; i++) {
+                        let size = (Math.random() * 1.5) + 0.5;
+                        let x = (Math.random() * ((canvas.width - size * 2) - (size * 2)) + size * 2);
+                        let y = (Math.random() * ((canvas.height - size * 2) - (size * 2)) + size * 2);
+                        let directionX = (Math.random() * 1) - 0.5;
+                        let directionY = (Math.random() * 1) - 0.5;
+                        let color = 'rgba(255, 255, 255, 0.2)';
+                        particlesArray.push(new Particle(x, y, directionX, directionY, size, color));
+                    }
+                }
+
+                function animateParticles() {
+                    requestAnimationFrame(animateParticles);
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    for (let i = 0; i < particlesArray.length; i++) {
+                        particlesArray[i].update();
+                    }
+                }
+
+                initParticles();
+                animateParticles();
+            }
+
+            /* --- Lógica de Copiado al Portapapeles --- */
+            window.copyToClipboard = function(text) {
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        showCopiedMessage();
+                    }).catch(err => {
+                        console.error('Error al copiar: ', err);
+                        fallbackCopyToClipboard(text);
+                    });
+                } else {
+                    fallbackCopyToClipboard(text);
+                }
+            };
+            
+            function fallbackCopyToClipboard(text) {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.top = '0';
+                textArea.style.left = '0';
+                textArea.style.opacity = '0';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showCopiedMessage();
+                } catch (err) {
+                    console.error('Error al copiar con fallback: ', err);
+                }
+                document.body.removeChild(textArea);
+            }
+
+            function showCopiedMessage() {
+                const message = document.getElementById('copiedMessage');
+                if (message) {
+                    message.classList.add('show');
+                    setTimeout(() => {
+                        message.classList.remove('show');
+                    }, 2000);
+                }
+            }
+
+            /* --- Lógica del Acordeón de Reglas --- */
+            const accordionHeaders = document.querySelectorAll('.accordion-header');
+            accordionHeaders.forEach(header => {
+                header.addEventListener('click', () => {
+                    const content = header.nextElementSibling;
+                    
+                    if (header.classList.contains('active')) {
+                        header.classList.remove('active');
+                        content.classList.remove('active');
+                        content.style.maxHeight = null;
+                    } else {
+                        /* Cerrar otros abiertos (opcional) */
+                        accordionHeaders.forEach(h => {
+                            h.classList.remove('active');
+                            h.nextElementSibling.classList.remove('active');
+                            h.nextElementSibling.style.maxHeight = null;
+                        });
+                        
+                        header.classList.add('active');
+                        content.classList.add('active');
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                    }
+                });
+            });
+            
+            /* --- Lógica del Slider de Galería --- */
+            const slider = document.querySelector('.slider');
+            if (slider) {
+                const slides = document.querySelectorAll('.slide');
+                const nextBtn = document.getElementById('nextSlide');
+                const prevBtn = document.getElementById('prevSlide');
+                const dotsContainer = document.getElementById('slider-dots');
+                let currentSlide = 0;
+                let autoSlideTimer;
+
+                function createDots() {
+                    slides.forEach((_, i) => {
+                        const dot = document.createElement('button');
+                        dot.classList.add('dot');
+                        if (i === 0) dot.classList.add('active');
+                        dot.setAttribute('aria-label', `Ir a slide ${i + 1}`);
+                        dot.addEventListener('click', () => {
+                            goToSlide(i);
+                        });
+                        dotsContainer.appendChild(dot);
+                    });
+                }
+
+                function updateDots() {
+                    const dots = document.querySelectorAll('.dot');
+                    dots.forEach((dot, i) => {
+                        dot.classList.toggle('active', i === currentSlide);
+                    });
+                }
+
+                function goToSlide(slideIndex) {
+                    if (slideIndex < 0) {
+                        currentSlide = slides.length - 1;
+                    } else if (slideIndex >= slides.length) {
+                        currentSlide = 0;
+                    } else {
+                        currentSlide = slideIndex;
+                    }
+                    slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+                    updateDots();
+                    resetAutoSlide();
+                }
+                
+                function resetAutoSlide() {
+                    clearInterval(autoSlideTimer);
+                    autoSlideTimer = setInterval(() => {
+                        goToSlide(currentSlide + 1);
+                    }, 5000); // Cambia de slide cada 5 segundos
+                }
+
+                if(nextBtn) nextBtn.addEventListener('click', () => goToSlide(currentSlide + 1));
+                if(prevBtn) prevBtn.addEventListener('click', () => goToSlide(currentSlide - 1));
+
+                createDots();
+                resetAutoSlide();
+            }
+
+            /* --- Lógica de Revelado al Scroll (Intersection Observer) --- */
+            const revealElements = document.querySelectorAll('.reveal');
+            const revealObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target); 
+                    }
+                });
+            }, {
+                root: null,
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            });
+
+            revealElements.forEach(el => {
+                revealObserver.observe(el);
+            });
+
+            /* --- Efecto 3D Dinámico en Tarjetas --- */
+            const cards3D = document.querySelectorAll('.card');
+            cards3D.forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    
+                    const rotateY = ((x - centerX) / centerX) * 15; /* Reducida intensidad */
+                    const rotateX = ((centerY - y) / centerY) * 15;
+                    
+                    /* Iluminación basada en mouse */
+                    card.style.setProperty('--mouse-x', `${(x / rect.width) * 100}%`);
+                    card.style.setProperty('--mouse-y', `${(y / rect.height) * 100}%`);
+                    
+                    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+                    
+                    const logo = card.querySelector('.card-logo');
+                    const title = card.querySelector('.card-title');
+                    const content = card.querySelector('.card-content');
+                    
+                    if (logo) logo.style.transform = `translateZ(80px) scale(1.1) rotateZ(${rotateY * 0.5}deg)`;
+                    if (title) title.style.transform = `translateZ(60px)`;
+                    if (content) content.style.transform = `translateZ(40px)`;
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
+                    card.style.setProperty('--mouse-x', `50%`);
+                    card.style.setProperty('--mouse-y', `50%`);
+                    
+                    const logo = card.querySelector('.card-logo');
+                    const title = card.querySelector('.card-title');
+                    const content = card.querySelector('.card-content');
+                    
+                    if (logo) logo.style.transform = 'translateZ(0) scale(1) rotateZ(0)';
+                    if (title) title.style.transform = 'translateZ(0)';
+                    if (content) content.style.transform = 'translateZ(0)';
+                });
+            });
+
+        });
+    </script>
+</body>
+</html>
